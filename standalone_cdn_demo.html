@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Standalone Vue 2 Barcode Scanner (CDN)</title>
+  <!-- Vue 2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+  <!-- html5-qrcode CDN -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f172a;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+    }
+    .container { width: 100%; max-width: 480px; }
+    h1 { font-size: 1.3rem; margin-bottom: 4px; text-align: center; }
+    .subtitle { font-size: 0.8rem; color: #94a3b8; text-align: center; margin-bottom: 16px; display: block; }
+    .scanner-card {
+      position: relative;
+      background: #1e293b;
+      border-radius: 16px;
+      padding: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    #reader-view {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #020617;
+      min-height: 280px;
+    }
+    #reader-view video { width: 100% !important; object-fit: cover !important; }
+    .btn {
+      width: 100%;
+      margin-top: 12px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .btn-start { background: #3b82f6; color: white; }
+    .btn-stop { background: #ef4444; color: white; }
+    .result-box {
+      margin-top: 16px;
+      background: #1e293b;
+      border: 1px solid #38bdf8;
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .result-title { font-size: 0.8rem; color: #38bdf8; font-weight: bold; margin-bottom: 6px; }
+    .result-text { font-family: monospace; font-size: 0.95rem; word-break: break-all; color: #fff; }
+  </style>
+</head>
+<body>
+  <div id="app" class="container">
+    <h1>📱 Vue 2 Scanner (CDN)</h1>
+    <span class="subtitle">Live camera feed barcode / QR reader</span>
+
+    <div class="scanner-card">
+      <div id="reader-view"></div>
+      <button v-if="!isScanning" @click="startScanner" class="btn btn-start">▶ Start Scanner</button>
+      <button v-else @click="stopScanner" class="btn btn-stop">⏹ Stop Scanner</button>
+    </div>
+
+    <div v-if="scannedResult" class="result-box">
+      <div class="result-title">🎯 SCANNED CODE:</div>
+      <div class="result-text">{{ scannedResult }}</div>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        scanner: null,
+        isScanning: false,
+        scannedResult: null
+      },
+      mounted() {
+        this.scanner = new Html5Qrcode("reader-view");
+      },
+      beforeDestroy() {
+        if (this.scanner && this.isScanning) {
+          this.scanner.stop();
+        }
+      },
+      methods: {
+        async startScanner() {
+          try {
+            await this.scanner.start(
+              { facingMode: "environment" },
+              { fps: 15, qrbox: { width: 250, height: 250 } },
+              (decodedText) => {
+                this.scannedResult = decodedText;
+                if (navigator.vibrate) navigator.vibrate(60);
+              },
+              () => {}
+            );
+            this.isScanning = true;
+          } catch (err) {
+            alert("Camera error: " + (err.message || err));
+          }
+        },
+        async stopScanner() {
+          if (this.scanner && this.isScanning) {
+            await this.scanner.stop();
+            this.isScanning = false;
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

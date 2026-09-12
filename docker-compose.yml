@@ -1,0 +1,28 @@
+services:
+  # The mobicam Vue 2 application served via Nginx
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mobicam-web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    networks:
+      - mobicam-net
+
+  frpc:
+    image: fatedier/frpc:v0.61.1
+    container_name: mobicam-frpc
+    restart: unless-stopped
+    command: ["-c", "/etc/frp/frpc.toml"]
+    depends_on:
+      - web
+    volumes:
+      - ./frpc.toml:/etc/frp/frpc.toml:ro
+    networks:
+      - mobicam-net
+
+networks:
+  mobicam-net:
+    driver: bridge
