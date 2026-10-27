@@ -44,3 +44,5 @@ Thumbs.db
 
 # FRP configs
 frpc.*
+ 
+*.pdf

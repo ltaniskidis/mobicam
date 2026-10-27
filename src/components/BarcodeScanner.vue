@@ -192,11 +192,31 @@
       </div>
     </div>
 
+    <!-- Primary Control Action Bar - Top Placement for Instant Visibility -->
+    <div class="action-bar action-bar-top">
+      <button 
+        v-if="!isScanning" 
+        @click="startScanning" 
+        class="btn btn-primary"
+        :disabled="isInitializing"
+      >
+        <span v-if="isInitializing" class="spinner">⏳ {{ lang === 'el' ? 'Εκκίνηση Κάμερας...' : 'Starting Camera...' }}</span>
+        <span v-else>▶ {{ lang === 'el' ? 'Έναρξη Σάρωσης (Live)' : 'Start Scanner (Live)' }}</span>
+      </button>
+
+      <button 
+        v-else 
+        @click="stopScanning" 
+        class="btn btn-danger"
+      >
+        ⏹ {{ lang === 'el' ? 'Διακοπή Σάρωσης' : 'Stop Scanner' }}
+      </button>
+    </div>
+
     <!-- Viewport Container -->
     <div 
       class="viewport-box" 
-      ref="viewportBox"
-      :class="{ 'macro-active-viewport': isMacroMode }"
+      :class="{ 'macro-active-viewport': isMacroMode, 'is-idle': !isScanning }" ref="viewportBox"
       @touchstart="handleTouchStart"
       @touchmove="handleTouchMove"
       @touchend="handleTouchEnd"
@@ -1746,7 +1766,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  touch-action: none;
+  touch-action: pan-y; /* Allows vertical touch scroll on mobile */
   transition: box-shadow 0.3s ease;
 }
 
@@ -2244,6 +2264,36 @@ export default {
 }
 
 /* Action Button */
+.action-bar-top {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.viewport-box.is-idle {
+  aspect-ratio: auto !important;
+  min-height: 200px;
+  max-height: 240px;
+  cursor: pointer;
+}
+
+.idle-start-btn {
+  margin-top: 10px;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.45);
+  transition: transform 0.2s;
+}
+
+.idle-start-btn:active {
+  transform: scale(0.96);
+}
+
 .action-bar {
   margin-top: 14px;
   width: 100%;

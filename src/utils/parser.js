@@ -43,10 +43,28 @@ export function parseScanResult(text, formatName = '') {
     };
   }
 
-  // 3. URLs
+  // 3. URLs & AADE myDATA Digital Delivery Notes
   try {
     const url = new URL(trimmed);
     if (url.protocol === 'http:' || url.protocol === 'https:') {
+      const isAade = url.hostname.includes('aade.gr') ||
+                     url.hostname.includes('primer.gr') ||
+                     url.pathname.includes('myDATA') ||
+                     url.pathname.includes('RegisterTransfer') ||
+                     url.searchParams.has('q') ||
+                     url.searchParams.has('mark');
+
+      if (isAade) {
+        return {
+          type: 'aade_delivery',
+          title: 'Ψηφιακό Δελτίο Αποστολής (ΑΑΔΕ myDATA)',
+          url: trimmed,
+          hostname: url.hostname,
+          isAadeDeliveryNote: true,
+          raw: trimmed
+        };
+      }
+
       return {
         type: 'url',
         title: 'Web Link',
